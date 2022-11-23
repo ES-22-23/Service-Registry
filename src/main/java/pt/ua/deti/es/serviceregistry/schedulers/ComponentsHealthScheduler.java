@@ -8,10 +8,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
 import pt.ua.deti.es.serviceregistry.utils.ComponentUtils;
 import pt.ua.deti.es.serviceregistry.entities.HealthReport;
 import pt.ua.deti.es.serviceregistry.web.services.RegistryWebService;
+
+import java.time.Duration;
 
 @Component
 @EnableScheduling
@@ -34,17 +38,39 @@ public class ComponentsHealthScheduler {
 
         registryWebService.getAllRegisteredComponents().forEach(registeredComponent -> {
 
-            RestTemplate restTemplate = new RestTemplateBuilder().build();
+            RestTemplate restTemplate = new RestTemplateBuilder()
+                    .setConnectTimeout(Duration.ofSeconds(1))
+                    .setReadTimeout(Duration.ofSeconds(1))
+                    .build();
+
             String componentHealthEndpoint = componentUtils.buildHealthEndpoint(registeredComponent, false);
 
-            HealthReport componentHealthReport = restTemplate.getForObject(componentHealthEndpoint, HealthReport.class);
+            HealthReport componentHealthReport;
 
-            if (componentHealthReport == null) {
-                log.warn(String.format("Unable to get Health Report for component %s.", registeredComponent.getComponentName()));
-                return;
+            try {
+                componentHealthReport = restTemplate.getForObject(componentHealthEndpoint, HealthReport.class);
+            } catch (RestClientException e) {
+                // Ignore Exception. Already treated in the next if statement.
+                componentHealthReport = null;
             }
 
-            if (!componentHealthReport.isRunning()) {
+            if (componentHealthReport != null && componentHealthReport.isHealthy()) {
+                registryWebService.updateAvailabilityStatus(registeredComponent.getId(), ComponentAvailability.ONLINE);
+            } else {
+
+                long lastTimeHealthyTimestamp = registeredComponent.getComponentAvailability().getLastTimeOnline();
+
+                if (registeredComponent.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE) {
+                    return;
+                }
+
+                if (System.currentTimeMillis() - lastTimeHealthyTimestamp > 60000) {
+                    registryWebService.updateAvailabilityStatus(registeredComponent.getId(), ComponentAvailability.OFFLINE);
+                    log.warn(String.format("Component %s (%s) did not respond for 1 minute - Marked as Offline.", registeredComponent.getComponentName(), registeredComponent.getId()));
+                } else {
+                    registryWebService.updateAvailabilityStatus(registeredComponent.getId(), ComponentAvailability.NOT_RESPONDING);
+                    log.warn(String.format("Component %s (%s) is not responding.", registeredComponent.getComponentName(), registeredComponent.getId()));
+                }
 
             }
 

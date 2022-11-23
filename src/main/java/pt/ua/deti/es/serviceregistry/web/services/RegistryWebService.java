@@ -1,5 +1,6 @@
 package pt.ua.deti.es.serviceregistry.web.services;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class RegistryWebService {
 
     @Value("${Services.Cameras.Ids:}")
@@ -63,8 +65,27 @@ public class RegistryWebService {
 
     }
 
-    public void unregisterComponent(UUID componentUniqueId) {
-        registeredComponentService.unregisterComponent(componentUniqueId);
+    public boolean unregisterComponent(UUID componentUniqueId) {
+        return registeredComponentService.unregisterComponent(componentUniqueId);
+    }
+
+    public void updateAvailabilityStatus(UUID componentUniqueId, ComponentAvailability componentAvailability) {
+
+        RegisteredComponentDto registeredComponent = registeredComponentService.getRegisteredComponent(componentUniqueId);
+
+        if (registeredComponent == null) {
+            log.warn("Trying to update availability status for a component that is not registered.");
+            return;
+        }
+
+        if (componentAvailability == ComponentAvailability.ONLINE) {
+            registeredComponent.setComponentAvailability(new ComponentAvailabilityDto(null, componentAvailability, System.currentTimeMillis()));
+        } else {
+            registeredComponent.setComponentAvailability(new ComponentAvailabilityDto(null, componentAvailability, registeredComponent.getComponentAvailability().getLastTimeOnline()));
+        }
+
+        registeredComponentService.updateComponent(registeredComponent);
+
     }
 
     private Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {

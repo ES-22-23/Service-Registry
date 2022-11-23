@@ -35,9 +35,12 @@ public class RegisteredComponentService {
 
     }
 
-    public void unregisterComponent(UUID serviceUniqueId) {
-        System.out.println(registeredComponentRepository.existsById(serviceUniqueId));
-        registeredComponentRepository.deleteById(serviceUniqueId);
+    public boolean unregisterComponent(UUID serviceUniqueId) {
+        if (registeredComponentRepository.existsById(serviceUniqueId)) {
+            registeredComponentRepository.deleteById(serviceUniqueId);
+            return true;
+        }
+        return false;
     }
 
     public List<RegisteredComponentDto> getRegisteredComponents() {
@@ -45,6 +48,22 @@ public class RegisteredComponentService {
                 .stream()
                 .map(RegisteredComponentModel::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public RegisteredComponentDto getRegisteredComponent(UUID componentUniqueId) {
+        return registeredComponentRepository.findById(componentUniqueId)
+                .map(RegisteredComponentModel::toDTO)
+                .orElse(null);
+    }
+
+    public void updateComponent(RegisteredComponentDto registeredComponentDto) {
+
+        RegisteredComponentModel registeredComponentModel = registeredComponentDto.toModel();
+
+        componentAddressRepository.save(registeredComponentModel.getComponentAddress());
+        componentAvailabilityRepository.save(registeredComponentModel.getComponentAvailability());
+        registeredComponentRepository.save(registeredComponentModel);
+
     }
 
 }

@@ -41,8 +41,15 @@ public class RegistryController {
 
     @DeleteMapping("/unregister")
     public RegistrationResponse unregisterComponent(@RequestBody UnregistrationRequest unregistrationRequest) {
-        registryWebService.unregisterComponent(unregistrationRequest.getComponentIdAsUUID());
-        return new RegistrationResponse("Service successfully un-registered.", unregistrationRequest.getComponentIdAsUUID());
+
+        boolean successfullyUnregistered = registryWebService.unregisterComponent(unregistrationRequest.getComponentIdAsUUID());
+
+        if (successfullyUnregistered) {
+            return new RegistrationResponse("Service successfully un-registered.", unregistrationRequest.getComponentIdAsUUID());
+        } else {
+            return new RegistrationResponse("Unable to un-registered the service.", null);
+        }
+
     }
 
     @GetMapping("/services")
