@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
 @Data
-public class ServiceAddress {
+public class ComponentAddress {
 
     @JsonAlias("public")
     private final String publicAddress;

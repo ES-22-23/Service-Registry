@@ -2,10 +2,9 @@ package pt.ua.deti.es.serviceregistry.data.models;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
-import pt.ua.deti.es.serviceregistry.web.entities.ServiceType;
+import pt.ua.deti.es.serviceregistry.web.entities.ComponentType;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -33,7 +32,7 @@ public class RegisteredComponentModel implements DataModel<RegisteredComponentDt
 
     @Enumerated(EnumType.STRING)
     @Column(name = "service_type", nullable = false)
-    private ServiceType serviceType;
+    private ComponentType componentType;
 
     @OneToOne(optional = false, orphanRemoval = true)
     @JoinColumn(name = "service_address_id", nullable = false)
@@ -54,7 +53,7 @@ public class RegisteredComponentModel implements DataModel<RegisteredComponentDt
 
     @Override
     public RegisteredComponentDto toDTO() {
-        return new RegisteredComponentDto(id, serviceName, healthEndpoint, serviceType, serviceAddress.toDTO());
+        return new RegisteredComponentDto(id, serviceName, healthEndpoint, componentType, serviceAddress.toDTO());
     }
 
 }

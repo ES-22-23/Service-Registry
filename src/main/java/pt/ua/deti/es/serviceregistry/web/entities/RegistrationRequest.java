@@ -1,13 +1,21 @@
 package pt.ua.deti.es.serviceregistry.web.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class RegistrationRequest {
 
-    private final String serviceName;
-    private final ServiceType serviceType;
-    private final String serviceHealthEndpoint;
-    private final ServiceAddress serviceAddress;
+    @JsonProperty("serviceName")
+    private final String componentName;
+
+    @JsonProperty("serviceType")
+    private final ComponentType componentType;
+
+    @JsonProperty("serviceHealthEndpoint")
+    private final String componentHealthEndpoint;
+
+    @JsonProperty("serviceAddress")
+    private final ComponentAddress componentAddress;
 
 }

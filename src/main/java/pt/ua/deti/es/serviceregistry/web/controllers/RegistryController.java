@@ -27,22 +27,22 @@ public class RegistryController {
     @PostMapping("/register")
     public RegistrationResponse registerNewComponent(@RequestBody RegistrationRequest registrationRequest) {
 
-        Optional<UUID> uniqueIdForService = registryWebService.getUniqueIdForComponent(registrationRequest.getServiceType());
+        Optional<UUID> uniqueIdForService = registryWebService.getUniqueIdForComponent(registrationRequest.getComponentType());
 
         return uniqueIdForService.map(uuid -> {
 
-            ComponentAddressDto componentAddressDto = new ComponentAddressDto(null, registrationRequest.getServiceAddress().getPrivateAddress(), registrationRequest.getServiceAddress().getPublicAddress());
-            RegisteredComponentDto serviceToBeRegisteredDto = new RegisteredComponentDto(uniqueIdForService.get(), registrationRequest.getServiceName(), registrationRequest.getServiceHealthEndpoint(), registrationRequest.getServiceType(), componentAddressDto);
+            ComponentAddressDto componentAddressDto = new ComponentAddressDto(null, registrationRequest.getComponentAddress().getPrivateAddress(), registrationRequest.getComponentAddress().getPublicAddress());
+            RegisteredComponentDto serviceToBeRegisteredDto = new RegisteredComponentDto(uniqueIdForService.get(), registrationRequest.getComponentName(), registrationRequest.getComponentHealthEndpoint(), registrationRequest.getComponentType(), componentAddressDto);
 
             registryWebService.registerComponent(serviceToBeRegisteredDto);
 
             return new RegistrationResponse(
-                    String.format("Service %s successfully registered.", registrationRequest.getServiceName()),
+                    String.format("Service %s successfully registered.", registrationRequest.getComponentName()),
                     uuid
             );
 
         }).orElseGet(() -> new RegistrationResponse(
-                String.format("Unable to register service %s.", registrationRequest.getServiceName()),
+                String.format("Unable to register service %s.", registrationRequest.getComponentName()),
                 null
         ));
 
