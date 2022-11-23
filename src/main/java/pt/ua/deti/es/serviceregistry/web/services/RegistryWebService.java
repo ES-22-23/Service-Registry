@@ -3,9 +3,13 @@ package pt.ua.deti.es.serviceregistry.web.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pt.ua.deti.es.serviceregistry.data.dto.ComponentAddressDto;
+import pt.ua.deti.es.serviceregistry.data.dto.ComponentAvailabilityDto;
 import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
 import pt.ua.deti.es.serviceregistry.data.services.RegisteredComponentService;
-import pt.ua.deti.es.serviceregistry.web.entities.ComponentType;
+import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
+import pt.ua.deti.es.serviceregistry.entities.ComponentType;
+import pt.ua.deti.es.serviceregistry.web.entities.RegistrationRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,15 +46,28 @@ public class RegistryWebService {
                 .collect(Collectors.toList());
     }
 
-    public void registerComponent(RegisteredComponentDto registeredComponentDto) {
-        registeredComponentService.registerComponent(registeredComponentDto);
+    public UUID registerComponent(RegistrationRequest registrationRequest) {
+
+        Optional<UUID> uniqueIdForService = getUniqueIdForComponent(registrationRequest.getComponentType());
+
+        ComponentAddressDto componentAddressDto = new ComponentAddressDto(null, registrationRequest.getComponentAddress().getPrivateAddress(), registrationRequest.getComponentAddress().getPublicAddress());
+        ComponentAvailabilityDto componentAvailabilityDto = new ComponentAvailabilityDto(null, ComponentAvailability.ONLINE, System.currentTimeMillis());
+
+        return uniqueIdForService.map(uuid -> {
+
+            RegisteredComponentDto serviceToBeRegisteredDto = new RegisteredComponentDto(uuid, registrationRequest.getComponentName(), registrationRequest.getComponentHealthEndpoint(), registrationRequest.getComponentProtocol(), registrationRequest.getComponentType(), componentAddressDto, componentAvailabilityDto);
+            registeredComponentService.registerComponent(serviceToBeRegisteredDto);
+            return uuid;
+
+        }).orElse(null);
+
     }
 
     public void unregisterComponent(UUID componentUniqueId) {
         registeredComponentService.unregisterComponent(componentUniqueId);
     }
 
-    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {
+    private Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {
 
         Optional<UUID> serviceUniqueId = Optional.empty();
 

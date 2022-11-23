@@ -4,7 +4,8 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
-import pt.ua.deti.es.serviceregistry.web.entities.ComponentType;
+import pt.ua.deti.es.serviceregistry.entities.ComponentProtocol;
+import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -25,10 +26,14 @@ public class RegisteredComponentModel implements DataModel<RegisteredComponentDt
     private UUID id;
 
     @Column(name = "service_name", nullable = false)
-    private String serviceName;
+    private String componentName;
 
     @Column(name = "health_endpoint")
     private String healthEndpoint;
+
+    @Enumerated
+    @Column(name = "service_protocol")
+    private ComponentProtocol componentProtocol;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "service_type", nullable = false)
@@ -36,7 +41,11 @@ public class RegisteredComponentModel implements DataModel<RegisteredComponentDt
 
     @OneToOne(optional = false, orphanRemoval = true)
     @JoinColumn(name = "service_address_id", nullable = false)
-    private ComponentAddressModel serviceAddress;
+    private ComponentAddressModel componentAddress;
+
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "service_availability_id")
+    private ComponentAvailabilityModel componentAvailability;
 
     @Override
     public boolean equals(Object o) {
@@ -53,7 +62,7 @@ public class RegisteredComponentModel implements DataModel<RegisteredComponentDt
 
     @Override
     public RegisteredComponentDto toDTO() {
-        return new RegisteredComponentDto(id, serviceName, healthEndpoint, componentType, serviceAddress.toDTO());
+        return new RegisteredComponentDto(id, componentName, healthEndpoint, componentProtocol, componentType, componentAddress.toDTO(), componentAvailability.toDTO());
     }
 
 }

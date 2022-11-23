@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
 import pt.ua.deti.es.serviceregistry.data.models.RegisteredComponentModel;
+import pt.ua.deti.es.serviceregistry.data.repositories.ComponentAvailabilityRepository;
 import pt.ua.deti.es.serviceregistry.data.repositories.RegisteredComponentRepository;
 import pt.ua.deti.es.serviceregistry.data.repositories.ComponentAddressRepository;
 
@@ -16,17 +17,20 @@ public class RegisteredComponentService {
 
     private final RegisteredComponentRepository registeredComponentRepository;
     private final ComponentAddressRepository componentAddressRepository;
+    private final ComponentAvailabilityRepository componentAvailabilityRepository;
 
     @Autowired
-    public RegisteredComponentService(RegisteredComponentRepository registeredComponentRepository, ComponentAddressRepository componentAddressRepository) {
+    public RegisteredComponentService(RegisteredComponentRepository registeredComponentRepository, ComponentAddressRepository componentAddressRepository, ComponentAvailabilityRepository componentAvailabilityRepository) {
         this.registeredComponentRepository = registeredComponentRepository;
         this.componentAddressRepository = componentAddressRepository;
+        this.componentAvailabilityRepository = componentAvailabilityRepository;
     }
 
     public void registerComponent(RegisteredComponentDto registeredComponentDto) {
 
         RegisteredComponentModel registeredComponentModel = registeredComponentDto.toModel();
-        componentAddressRepository.save(registeredComponentModel.getServiceAddress());
+        componentAddressRepository.save(registeredComponentModel.getComponentAddress());
+        componentAvailabilityRepository.save(registeredComponentModel.getComponentAvailability());
         registeredComponentRepository.save(registeredComponentModel);
 
     }

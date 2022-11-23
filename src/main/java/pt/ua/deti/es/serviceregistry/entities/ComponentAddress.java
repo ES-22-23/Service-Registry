@@ -1,4 +1,4 @@
-package pt.ua.deti.es.serviceregistry.web.entities;
+package pt.ua.deti.es.serviceregistry.entities;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
