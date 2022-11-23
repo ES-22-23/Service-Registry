@@ -2,6 +2,7 @@ package pt.ua.deti.es.serviceregistry.schedulers;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -25,6 +26,9 @@ public class ComponentsHealthScheduler {
 
     private final RegistryWebService registryWebService;
     private final ComponentUtils componentUtils;
+
+    @Value("${Services.Availability.OfflineTimeout}")
+    private int availabilityOfflineTimeout;
 
     @Autowired
     public ComponentsHealthScheduler(RegistryWebService registryWebService, ComponentUtils componentUtils) {
@@ -64,7 +68,7 @@ public class ComponentsHealthScheduler {
                     return;
                 }
 
-                if (System.currentTimeMillis() - lastTimeHealthyTimestamp > 60000) {
+                if (System.currentTimeMillis() - lastTimeHealthyTimestamp > availabilityOfflineTimeout) {
                     registryWebService.updateAvailabilityStatus(registeredComponent.getId(), ComponentAvailability.OFFLINE);
                     log.warn(String.format("Component %s (%s) did not respond for 1 minute - Marked as Offline.", registeredComponent.getComponentName(), registeredComponent.getId()));
                 } else {
