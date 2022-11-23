@@ -37,7 +37,7 @@ public class ComponentsHealthScheduler {
     }
 
     @Async
-    @Scheduled(fixedDelayString = "${Schedulers.ComponentsAvailability.Delay}")
+    @Scheduled(fixedDelayString = "${Services.Availability.HealthCheck.Delay}")
     public void checkComponentsAvailability() {
 
         registryWebService.getAllRegisteredComponents().forEach(registeredComponent -> {

@@ -92,6 +92,20 @@ public class RegistryWebService {
 
         Optional<UUID> serviceUniqueId = Optional.empty();
 
+        if (!hasAvailableIds(componentType)) {
+
+            log.warn("No more available ids for component type: {}. Trying to free an ID...", componentType);
+
+            UUID freedUniqueId = freeUniqueIdForComponent(componentType);
+
+            if (freedUniqueId != null) {
+                log.info("Freed unique id: {} for component type: {}", freedUniqueId, componentType);
+            } else {
+                log.warn("Unable to free an id for component type: {}. There are no Offline components...", componentType);
+            }
+
+        }
+
         List<RegisteredComponentDto> registeredComponentsByType = getFilteredRegisteredComponents(componentType);
         List<UUID> occupiedIds = registeredComponentsByType
                 .stream()
@@ -121,6 +135,36 @@ public class RegistryWebService {
         }
 
         return serviceUniqueId;
+
+    }
+
+    private boolean hasAvailableIds(ComponentType componentType) {
+
+        switch (componentType) {
+            case API:
+            case UI:
+                return getFilteredRegisteredComponents(componentType).size() < otherServicesUniqueIds.size();
+            case CAMERA:
+                return getFilteredRegisteredComponents(componentType).size() < availableCamerasUniqueIds.size();
+            case ALARM:
+                return getFilteredRegisteredComponents(componentType).size() < availableAlarmsUniqueIds.size();
+        }
+
+        return false;
+
+    }
+
+    private UUID freeUniqueIdForComponent(ComponentType componentType) {
+
+        Optional<RegisteredComponentDto> componentThatCanBeUnregistered = getFilteredRegisteredComponents(componentType).stream()
+                .filter(registeredComponentDto -> registeredComponentDto.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE)
+                .findAny();
+
+        if (componentThatCanBeUnregistered.isPresent() && unregisterComponent(componentThatCanBeUnregistered.get().getId())) {
+            return componentThatCanBeUnregistered.get().getId();
+        }
+
+        return null;
 
     }
 
