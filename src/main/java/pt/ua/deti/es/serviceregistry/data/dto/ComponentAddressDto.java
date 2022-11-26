@@ -1,11 +1,11 @@
 package pt.ua.deti.es.serviceregistry.data.dto;
 
 import lombok.Data;
+import lombok.Generated;
 import pt.ua.deti.es.serviceregistry.data.models.ComponentAddressModel;
 
-import java.io.Serializable;
-
 @Data
+@Generated
 public class ComponentAddressDto implements DataTransferObject<ComponentAddressModel> {
 
     private final Long id;

@@ -1,12 +1,11 @@
 package pt.ua.deti.es.serviceregistry.data.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.Hibernate;
 import pt.ua.deti.es.serviceregistry.data.dto.ComponentAddressDto;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "services_addresses")
@@ -14,6 +13,8 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Generated
 public class ComponentAddressModel implements DataModel<ComponentAddressDto> {
 
     @Id
@@ -30,6 +31,19 @@ public class ComponentAddressModel implements DataModel<ComponentAddressDto> {
     @Override
     public ComponentAddressDto toDTO() {
         return new ComponentAddressDto(id, privateAddress, publicAddress);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        ComponentAddressModel that = (ComponentAddressModel) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
 }

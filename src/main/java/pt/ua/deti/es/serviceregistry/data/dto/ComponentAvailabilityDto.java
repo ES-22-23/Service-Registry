@@ -1,10 +1,12 @@
 package pt.ua.deti.es.serviceregistry.data.dto;
 
 import lombok.Data;
+import lombok.Generated;
 import pt.ua.deti.es.serviceregistry.data.models.ComponentAvailabilityModel;
 import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
 
 @Data
+@Generated
 public class ComponentAvailabilityDto implements DataTransferObject<ComponentAvailabilityModel> {
 
     private final Long id;

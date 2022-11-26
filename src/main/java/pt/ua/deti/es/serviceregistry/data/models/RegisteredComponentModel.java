@@ -12,12 +12,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Table(name="registered_services")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name="registered_services")
+@Generated
 public class RegisteredComponentModel implements DataModel<RegisteredComponentDto> {
 
     @Id
