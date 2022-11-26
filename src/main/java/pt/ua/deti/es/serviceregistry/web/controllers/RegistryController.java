@@ -29,7 +29,8 @@ public class RegistryController {
     @PostMapping("/register")
     public RegistrationResponse registerNewComponent(@RequestBody RegistrationRequest registrationRequest) {
 
-        UUID registeredComponentUniqueId = registryWebService.registerComponent(registrationRequest);
+        UUID registeredComponentUniqueId = registryWebService.registerComponent(registrationRequest,
+                registryWebService.getUniqueIdForComponent(registrationRequest.getComponentType()));
 
         if (registeredComponentUniqueId != null) {
             return new RegistrationResponse("Service successfully registered.", registeredComponentUniqueId);

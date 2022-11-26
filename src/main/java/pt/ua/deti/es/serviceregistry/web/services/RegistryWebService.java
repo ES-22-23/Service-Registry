@@ -42,20 +42,18 @@ public class RegistryWebService {
     }
 
     public List<RegisteredComponentDto> getFilteredRegisteredComponents(ComponentType componentType) {
-        return getAllRegisteredComponents()
+        return registeredComponentService.getRegisteredComponents()
                 .stream()
                 .filter(registeredComponentDto -> registeredComponentDto.getComponentType() == componentType)
                 .collect(Collectors.toList());
     }
 
-    public UUID registerComponent(RegistrationRequest registrationRequest) {
-
-        Optional<UUID> uniqueIdForService = getUniqueIdForComponent(registrationRequest.getComponentType());
+    public UUID registerComponent(RegistrationRequest registrationRequest, Optional<UUID> componentUniqueId) {
 
         ComponentAddressDto componentAddressDto = new ComponentAddressDto(null, registrationRequest.getComponentAddress().getPrivateAddress(), registrationRequest.getComponentAddress().getPublicAddress());
         ComponentAvailabilityDto componentAvailabilityDto = new ComponentAvailabilityDto(null, ComponentAvailability.ONLINE, System.currentTimeMillis());
 
-        return uniqueIdForService.map(uuid -> {
+        return componentUniqueId.map(uuid -> {
 
             RegisteredComponentDto serviceToBeRegisteredDto = new RegisteredComponentDto(uuid, registrationRequest.getComponentName(), registrationRequest.getComponentHealthEndpoint(), registrationRequest.getComponentProtocol(), registrationRequest.getComponentType(), componentAddressDto, componentAvailabilityDto);
             registeredComponentService.registerComponent(serviceToBeRegisteredDto);
@@ -69,13 +67,13 @@ public class RegistryWebService {
         return registeredComponentService.unregisterComponent(componentUniqueId);
     }
 
-    public void updateAvailabilityStatus(UUID componentUniqueId, ComponentAvailability componentAvailability) {
+    public RegisteredComponentDto updateAvailabilityStatus(UUID componentUniqueId, ComponentAvailability componentAvailability) {
 
         RegisteredComponentDto registeredComponent = registeredComponentService.getRegisteredComponent(componentUniqueId);
 
         if (registeredComponent == null) {
             log.warn("Trying to update availability status for a component that is not registered.");
-            return;
+            return null;
         }
 
         if (componentAvailability == ComponentAvailability.ONLINE) {
@@ -85,14 +83,15 @@ public class RegistryWebService {
         }
 
         registeredComponentService.updateComponent(registeredComponent);
+        return registeredComponent;
 
     }
 
-    private Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {
+    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {
 
         Optional<UUID> serviceUniqueId = Optional.empty();
 
-        if (!hasAvailableIds(componentType)) {
+        if (!hasAvailableIds(componentType, getFilteredRegisteredComponents(componentType))) {
 
             log.warn("No more available ids for component type: {}. Trying to free an ID...", componentType);
 
@@ -138,16 +137,16 @@ public class RegistryWebService {
 
     }
 
-    private boolean hasAvailableIds(ComponentType componentType) {
+    private boolean hasAvailableIds(ComponentType componentType, List<RegisteredComponentDto> filteredRegisteredComponents) {
 
         switch (componentType) {
             case API:
             case UI:
-                return getFilteredRegisteredComponents(componentType).size() < otherServicesUniqueIds.size();
+                return filteredRegisteredComponents.size() < otherServicesUniqueIds.size();
             case CAMERA:
-                return getFilteredRegisteredComponents(componentType).size() < availableCamerasUniqueIds.size();
+                return filteredRegisteredComponents.size() < availableCamerasUniqueIds.size();
             case ALARM:
-                return getFilteredRegisteredComponents(componentType).size() < availableAlarmsUniqueIds.size();
+                return filteredRegisteredComponents.size() < availableAlarmsUniqueIds.size();
         }
 
         return false;

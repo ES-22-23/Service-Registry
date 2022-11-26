@@ -1,18 +1,21 @@
 package pt.ua.deti.es.serviceregistry.data.models;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 import pt.ua.deti.es.serviceregistry.data.dto.ComponentAvailabilityDto;
 import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
+@Table(name = "services_availability")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name = "services_availability")
+@Generated
 public class ComponentAvailabilityModel implements DataModel<ComponentAvailabilityDto> {
 
     @Id
@@ -30,6 +33,19 @@ public class ComponentAvailabilityModel implements DataModel<ComponentAvailabili
     @Override
     public ComponentAvailabilityDto toDTO() {
         return new ComponentAvailabilityDto(id, componentAvailability, lastTimeOnline);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        ComponentAvailabilityModel that = (ComponentAvailabilityModel) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
 }
