@@ -13,12 +13,9 @@ import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 import pt.ua.deti.es.serviceregistry.utils.ComponentUtils;
 import pt.ua.deti.es.serviceregistry.web.services.RegistryWebService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

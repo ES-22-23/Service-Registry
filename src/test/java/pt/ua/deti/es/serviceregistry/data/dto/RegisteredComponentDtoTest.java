@@ -9,7 +9,6 @@ import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RegisteredComponentDtoTest {
 

@@ -153,9 +153,9 @@ public class RegistryWebService {
             case ALARM:
                 return filteredRegisteredComponents.size() < Optional.ofNullable(availableAlarmsUniqueIds)
                         .orElse(Collections.emptyList()).size();
+            default:
+                return false;
         }
-
-        return false;
 
     }
 

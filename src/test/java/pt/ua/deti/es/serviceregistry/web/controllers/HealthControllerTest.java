@@ -9,7 +9,6 @@ import pt.ua.deti.es.serviceregistry.entities.HealthReport;
 import pt.ua.deti.es.serviceregistry.web.services.HealthService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
