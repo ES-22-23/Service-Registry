@@ -11,7 +11,7 @@
 
     <groupId>pt.ua.deti.es</groupId>
     <artifactId>ServiceRegistry</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>ServiceRegistry</name>
     <description>ServiceRegistry service to register microservices in the ecosystem.</description>
 
