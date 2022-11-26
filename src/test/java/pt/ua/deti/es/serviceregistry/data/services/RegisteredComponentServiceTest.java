@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
 import pt.ua.deti.es.serviceregistry.data.models.ComponentAddressModel;
@@ -44,9 +43,9 @@ class RegisteredComponentServiceTest {
 
         registeredComponentService.registerComponent(registeredComponentDtoMock);
 
-        verify(this.registeredComponentRepository, Mockito.times(1)).save(Mockito.any(RegisteredComponentModel.class));
-        verify(this.componentAddressRepository, Mockito.times(1)).save(Mockito.any(ComponentAddressModel.class));
-        verify(this.componentAvailabilityRepository, Mockito.times(1)).save(Mockito.any(ComponentAvailabilityModel.class));
+        verify(this.registeredComponentRepository, times(1)).save(any(RegisteredComponentModel.class));
+        verify(this.componentAddressRepository, times(1)).save(any(ComponentAddressModel.class));
+        verify(this.componentAvailabilityRepository, times(1)).save(any(ComponentAvailabilityModel.class));
 
     }
 
@@ -60,7 +59,7 @@ class RegisteredComponentServiceTest {
         assertThat(registeredComponentService.unregisterComponent(existingComponentId))
                 .isTrue();
 
-        verify(this.registeredComponentRepository, Mockito.times(1)).deleteById(existingComponentId);
+        verify(this.registeredComponentRepository, times(1)).deleteById(existingComponentId);
 
     }
 
@@ -74,7 +73,7 @@ class RegisteredComponentServiceTest {
         assertThat(registeredComponentService.unregisterComponent(existingComponentId))
                 .isFalse();
 
-        verify(this.registeredComponentRepository, Mockito.times(0)).deleteById(existingComponentId);
+        verify(this.registeredComponentRepository, times(0)).deleteById(existingComponentId);
 
     }
 
@@ -89,7 +88,7 @@ class RegisteredComponentServiceTest {
                 .isNotNull()
                 .hasSize(2);
 
-        verify(this.registeredComponentRepository, Mockito.times(1)).findAll();
+        verify(this.registeredComponentRepository, times(1)).findAll();
 
     }
 
@@ -106,7 +105,7 @@ class RegisteredComponentServiceTest {
         assertThat(this.registeredComponentService.getRegisteredComponent(existingComponentId)).isNotNull()
                 .isEqualTo(registeredComponentDtoMock);
 
-        verify(this.registeredComponentRepository, Mockito.times(1)).findById(existingComponentId);
+        verify(this.registeredComponentRepository, times(1)).findById(existingComponentId);
 
     }
 
@@ -121,9 +120,9 @@ class RegisteredComponentServiceTest {
 
         registeredComponentService.registerComponent(registeredComponentDtoMock);
 
-        verify(this.registeredComponentRepository, Mockito.times(1)).save(Mockito.any(RegisteredComponentModel.class));
-        verify(this.componentAddressRepository, Mockito.times(1)).save(Mockito.any(ComponentAddressModel.class));
-        verify(this.componentAvailabilityRepository, Mockito.times(1)).save(Mockito.any(ComponentAvailabilityModel.class));
+        verify(this.registeredComponentRepository, times(1)).save(any(RegisteredComponentModel.class));
+        verify(this.componentAddressRepository, times(1)).save(any(ComponentAddressModel.class));
+        verify(this.componentAvailabilityRepository, times(1)).save(any(ComponentAvailabilityModel.class));
 
     }
 

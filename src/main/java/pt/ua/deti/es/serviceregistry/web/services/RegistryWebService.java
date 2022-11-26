@@ -94,7 +94,7 @@ public class RegistryWebService {
 
     public Optional<UUID> getUniqueIdForComponent(ComponentType componentType, List<UUID> occupiedIds, boolean hasAvailableIds) {
 
-        Optional<UUID> serviceUniqueId = Optional.empty();
+        Optional<UUID> serviceUniqueId;
 
         if (!hasAvailableIds) {
 
@@ -133,6 +133,9 @@ public class RegistryWebService {
                         .stream()
                         .filter(uuid -> !occupiedIds.contains(uuid))
                         .findAny();
+                break;
+            default:
+                serviceUniqueId = Optional.empty();
                 break;
         }
 
