@@ -15,6 +15,7 @@ import pt.ua.deti.es.serviceregistry.entities.ComponentProtocol;
 import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 import pt.ua.deti.es.serviceregistry.web.entities.RegistrationRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -111,6 +112,7 @@ class RegistryWebServiceTest {
         when(registeredComponentDtoMock.getComponentAvailability()).thenReturn(new ComponentAvailabilityDto(
                 1L, componentAvailabilityStub, 100L
         ));
+
         when(registeredComponentService.getRegisteredComponent(componentId)).thenReturn(registeredComponentDtoMock);
 
         assertThat(registryWebService.updateAvailabilityStatus(componentId, ComponentAvailability.ONLINE))
@@ -121,8 +123,114 @@ class RegistryWebServiceTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("availability", componentAvailabilityStub);
 
-        verify(registeredComponentService, times(2)).getRegisteredComponent(any());
+        when(registeredComponentService.getRegisteredComponent(componentId)).thenReturn(null);
+
+        assertThat(registryWebService.updateAvailabilityStatus(componentId, ComponentAvailability.ONLINE))
+                .isNull();
+
+        verify(registeredComponentService, times(3)).getRegisteredComponent(any());
         verify(registeredComponentService, times(2)).updateComponent(any());
+
+    }
+
+    @Test
+    void getUniqueIdForComponent() {
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.CAMERA, new ArrayList<>(), true))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.CAMERA, new ArrayList<>(),false))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.UI, new ArrayList<>(), true))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.UI, new ArrayList<>(),false))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.API, new ArrayList<>(), true))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.API, new ArrayList<>(),false))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.ALARM, new ArrayList<>(), true))
+                .isNotNull()
+                .isNotPresent();
+
+        assertThat(registryWebService.getUniqueIdForComponent(ComponentType.ALARM, new ArrayList<>(),false))
+                .isNotNull()
+                .isNotPresent();
+
+    }
+
+    @Test
+    void hasAvailableIds() {
+
+        assertThat(registryWebService.hasAvailableIds(ComponentType.CAMERA, new ArrayList<>()))
+                .isNotNull()
+                .isFalse();
+
+        assertThat(registryWebService.hasAvailableIds(ComponentType.ALARM, new ArrayList<>()))
+                .isNotNull()
+                .isFalse();
+
+        assertThat(registryWebService.hasAvailableIds(ComponentType.UI, new ArrayList<>()))
+                .isNotNull()
+                .isFalse();
+
+        assertThat(registryWebService.hasAvailableIds(ComponentType.API, new ArrayList<>()))
+                .isNotNull()
+                .isFalse();
+
+        assertThat(registryWebService.hasAvailableIds(ComponentType.UNKNOWN, new ArrayList<>()))
+                .isNotNull()
+                .isFalse();
+
+    }
+
+    @Test
+    void getOccupiedIds() {
+
+        UUID componentId = UUID.randomUUID();
+
+        List<RegisteredComponentDto> registeredComponentDtoList = List.of(new RegisteredComponentDto(
+                componentId, "", "",
+                ComponentProtocol.HTTP, ComponentType.ALARM, mock(ComponentAddressDto.class),
+                mock(ComponentAvailabilityDto.class))
+        );
+
+        when(registeredComponentService.getRegisteredComponents()).thenReturn(registeredComponentDtoList);
+
+        assertThat(registryWebService.getOccupiedIds())
+                .isNotNull()
+                .hasSize(1)
+                .contains(componentId);
+
+        verify(registeredComponentService, times(1)).getRegisteredComponents();
+
+    }
+
+    @Test
+    void freeUniqueIdForComponent() {
+
+        UUID componentUniqueId = UUID.randomUUID();
+        RegisteredComponentDto registeredComponentDtoStub = new RegisteredComponentDto(
+                componentUniqueId, "", "",
+                ComponentProtocol.HTTP, ComponentType.ALARM, mock(ComponentAddressDto.class),
+                mock(ComponentAvailabilityDto.class));
+
+        when(registeredComponentService.unregisterComponent(componentUniqueId)).thenReturn(true);
+
+        assertThat(registryWebService.freeUniqueIdForComponent(Optional.of(registeredComponentDtoStub)))
+                .isNotNull()
+                .isEqualTo(componentUniqueId);
 
     }
 

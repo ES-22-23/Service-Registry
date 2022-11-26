@@ -12,9 +12,7 @@ import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
 import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 import pt.ua.deti.es.serviceregistry.web.entities.RegistrationRequest;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,15 +85,26 @@ public class RegistryWebService {
 
     }
 
-    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType) {
+    public List<UUID> getOccupiedIds() {
+        return registeredComponentService.getRegisteredComponents()
+                .stream()
+                .map(RegisteredComponentDto::getId)
+                .collect(Collectors.toList());
+    }
+
+    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType, List<UUID> occupiedIds, boolean hasAvailableIds) {
 
         Optional<UUID> serviceUniqueId = Optional.empty();
 
-        if (!hasAvailableIds(componentType, getFilteredRegisteredComponents(componentType))) {
+        if (!hasAvailableIds) {
 
             log.warn("No more available ids for component type: {}. Trying to free an ID...", componentType);
 
-            UUID freedUniqueId = freeUniqueIdForComponent(componentType);
+            Optional<RegisteredComponentDto> componentToBeUnregistered = getFilteredRegisteredComponents(componentType).stream()
+                    .filter(registeredComponentDto -> registeredComponentDto.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE)
+                    .findAny();
+
+            UUID freedUniqueId = freeUniqueIdForComponent(componentToBeUnregistered);
 
             if (freedUniqueId != null) {
                 log.info("Freed unique id: {} for component type: {}", freedUniqueId, componentType);
@@ -105,28 +114,22 @@ public class RegistryWebService {
 
         }
 
-        List<RegisteredComponentDto> registeredComponentsByType = getFilteredRegisteredComponents(componentType);
-        List<UUID> occupiedIds = registeredComponentsByType
-                .stream()
-                .map(RegisteredComponentDto::getId)
-                .collect(Collectors.toList());
-
         switch (componentType) {
             case API:
             case UI:
-                serviceUniqueId = otherServicesUniqueIds
+                serviceUniqueId = Optional.ofNullable(otherServicesUniqueIds).orElse(new ArrayList<>())
                         .stream()
                         .filter(uuid -> !occupiedIds.contains(uuid))
                         .findAny();
                 break;
             case CAMERA:
-                serviceUniqueId = availableCamerasUniqueIds
+                serviceUniqueId = Optional.ofNullable(availableCamerasUniqueIds).orElse(new ArrayList<>())
                         .stream()
                         .filter(uuid -> !occupiedIds.contains(uuid))
                         .findAny();
                 break;
             case ALARM:
-                serviceUniqueId = availableAlarmsUniqueIds
+                serviceUniqueId = Optional.ofNullable(availableAlarmsUniqueIds).orElse(new ArrayList<>())
                         .stream()
                         .filter(uuid -> !occupiedIds.contains(uuid))
                         .findAny();
@@ -137,29 +140,28 @@ public class RegistryWebService {
 
     }
 
-    private boolean hasAvailableIds(ComponentType componentType, List<RegisteredComponentDto> filteredRegisteredComponents) {
+    public boolean hasAvailableIds(ComponentType componentType, List<RegisteredComponentDto> filteredRegisteredComponents) {
 
         switch (componentType) {
             case API:
             case UI:
-                return filteredRegisteredComponents.size() < otherServicesUniqueIds.size();
+                return filteredRegisteredComponents.size() < Optional.ofNullable(otherServicesUniqueIds)
+                        .orElse(Collections.emptyList()).size();
             case CAMERA:
-                return filteredRegisteredComponents.size() < availableCamerasUniqueIds.size();
+                return filteredRegisteredComponents.size() < Optional.ofNullable(availableCamerasUniqueIds)
+                        .orElse(Collections.emptyList()).size();
             case ALARM:
-                return filteredRegisteredComponents.size() < availableAlarmsUniqueIds.size();
+                return filteredRegisteredComponents.size() < Optional.ofNullable(availableAlarmsUniqueIds)
+                        .orElse(Collections.emptyList()).size();
         }
 
         return false;
 
     }
 
-    private UUID freeUniqueIdForComponent(ComponentType componentType) {
+    public UUID freeUniqueIdForComponent(Optional<RegisteredComponentDto> componentThatCanBeUnregistered) {
 
-        Optional<RegisteredComponentDto> componentThatCanBeUnregistered = getFilteredRegisteredComponents(componentType).stream()
-                .filter(registeredComponentDto -> registeredComponentDto.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE)
-                .findAny();
-
-        if (componentThatCanBeUnregistered.isPresent() && unregisterComponent(componentThatCanBeUnregistered.get().getId())) {
+        if (componentThatCanBeUnregistered.isPresent() && registeredComponentService.unregisterComponent(componentThatCanBeUnregistered.get().getId())) {
             return componentThatCanBeUnregistered.get().getId();
         }
 

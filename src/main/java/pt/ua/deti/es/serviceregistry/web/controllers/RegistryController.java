@@ -2,17 +2,13 @@ package pt.ua.deti.es.serviceregistry.web.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import pt.ua.deti.es.serviceregistry.data.dto.ComponentAvailabilityDto;
-import pt.ua.deti.es.serviceregistry.data.dto.RegisteredComponentDto;
-import pt.ua.deti.es.serviceregistry.data.dto.ComponentAddressDto;
-import pt.ua.deti.es.serviceregistry.entities.ComponentAvailability;
+import pt.ua.deti.es.serviceregistry.entities.ComponentType;
 import pt.ua.deti.es.serviceregistry.web.entities.RegisteredServicesResponse;
 import pt.ua.deti.es.serviceregistry.web.entities.RegistrationRequest;
 import pt.ua.deti.es.serviceregistry.web.entities.RegistrationResponse;
 import pt.ua.deti.es.serviceregistry.web.entities.UnregistrationRequest;
 import pt.ua.deti.es.serviceregistry.web.services.RegistryWebService;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -29,8 +25,11 @@ public class RegistryController {
     @PostMapping("/register")
     public RegistrationResponse registerNewComponent(@RequestBody RegistrationRequest registrationRequest) {
 
+        ComponentType componentType = registrationRequest.getComponentType();
         UUID registeredComponentUniqueId = registryWebService.registerComponent(registrationRequest,
-                registryWebService.getUniqueIdForComponent(registrationRequest.getComponentType()));
+                registryWebService.getUniqueIdForComponent(componentType,
+                        registryWebService.getOccupiedIds(),
+                        registryWebService.hasAvailableIds(componentType, registryWebService.getFilteredRegisteredComponents(componentType))));
 
         if (registeredComponentUniqueId != null) {
             return new RegistrationResponse("Service successfully registered.", registeredComponentUniqueId);

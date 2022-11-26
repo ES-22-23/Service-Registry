@@ -1,5 +1,6 @@
 package pt.ua.deti.es.serviceregistry.security;
 
+import lombok.Generated;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -23,6 +24,7 @@ import java.util.List;
 @EnableWebSecurity
 @KeycloakConfiguration
 @ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
+@Generated
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     @Autowired
