@@ -9,6 +9,7 @@ import pt.ua.deti.es.serviceregistry.web.entities.RegistrationResponse;
 import pt.ua.deti.es.serviceregistry.web.entities.UnregistrationRequest;
 import pt.ua.deti.es.serviceregistry.web.services.RegistryWebService;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -26,10 +27,16 @@ public class RegistryController {
     public RegistrationResponse registerNewComponent(@RequestBody RegistrationRequest registrationRequest) {
 
         ComponentType componentType = registrationRequest.getComponentType();
-        UUID registeredComponentUniqueId = registryWebService.registerComponent(registrationRequest,
-                registryWebService.getUniqueIdForComponent(componentType,
-                        registryWebService.getOccupiedIds(),
-                        registryWebService.hasAvailableIds(componentType, registryWebService.getFilteredRegisteredComponents(componentType))));
+        boolean hasAvailableUniqueIds = registryWebService.hasAvailableIds(componentType, registryWebService.getFilteredRegisteredComponents(componentType));
+        Optional<UUID> componentUniqueId;
+
+        if (!hasAvailableUniqueIds) {
+            componentUniqueId = registryWebService.freeUniqueIdForComponent(componentType);
+        } else {
+            componentUniqueId = registryWebService.getUniqueIdForComponent(componentType, registryWebService.getOccupiedIds());
+        }
+
+        UUID registeredComponentUniqueId = registryWebService.registerComponent(registrationRequest, componentUniqueId);
 
         if (registeredComponentUniqueId != null) {
             return new RegistrationResponse("Service successfully registered.", registeredComponentUniqueId);

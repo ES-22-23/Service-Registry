@@ -92,27 +92,9 @@ public class RegistryWebService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType, List<UUID> occupiedIds, boolean hasAvailableIds) {
+    public Optional<UUID> getUniqueIdForComponent(ComponentType componentType, List<UUID> occupiedIds) {
 
         Optional<UUID> serviceUniqueId;
-
-        if (!hasAvailableIds) {
-
-            log.warn("No more available ids for component type: {}. Trying to free an ID...", componentType);
-
-            Optional<RegisteredComponentDto> componentToBeUnregistered = getFilteredRegisteredComponents(componentType).stream()
-                    .filter(registeredComponentDto -> registeredComponentDto.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE)
-                    .findAny();
-
-            UUID freedUniqueId = freeUniqueIdForComponent(componentToBeUnregistered);
-
-            if (freedUniqueId != null) {
-                log.info("Freed unique id: {} for component type: {}", freedUniqueId, componentType);
-            } else {
-                log.warn("Unable to free an id for component type: {}. There are no Offline components...", componentType);
-            }
-
-        }
 
         switch (componentType) {
             case API:
@@ -162,13 +144,27 @@ public class RegistryWebService {
 
     }
 
-    public UUID freeUniqueIdForComponent(Optional<RegisteredComponentDto> componentThatCanBeUnregistered) {
+    public Optional<UUID> freeUniqueIdForComponent(ComponentType componentType) {
 
-        if (componentThatCanBeUnregistered.isPresent() && registeredComponentService.unregisterComponent(componentThatCanBeUnregistered.get().getId())) {
-            return componentThatCanBeUnregistered.get().getId();
+        Optional<UUID> freedId = Optional.empty();
+        Optional<RegisteredComponentDto> componentToBeUnregistered = registeredComponentService.getRegisteredComponents()
+                .stream()
+                .filter(registeredComponentDto -> registeredComponentDto.getComponentType() == componentType)
+                .filter(registeredComponentDto -> registeredComponentDto.getComponentAvailability().getAvailability() == ComponentAvailability.OFFLINE)
+                .findAny();
+
+        if (componentToBeUnregistered.isPresent()) {
+            if (registeredComponentService.unregisterComponent(componentToBeUnregistered.get().getId())) {
+                freedId = Optional.ofNullable(componentToBeUnregistered.get().getId());
+                log.info("Freed unique id: {} for component type: {}", freedId.orElse(null), componentType);
+            } else {
+                log.error("Unable to unregister component: {}", componentToBeUnregistered.get().getId());
+            }
+        } else {
+            log.warn("Unable to free an id for component type: {}. There are no Offline components...", componentType);
         }
 
-        return null;
+        return freedId;
 
     }
 
