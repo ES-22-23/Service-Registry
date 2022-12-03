@@ -68,7 +68,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
         final CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://scss.hgsoft.me:3000", "http://scss.hgsoft.me:3001"));
+        config.setAllowedOrigins(List.of("http://admin.scss.hgsoft.me", "http://client.scss.hgsoft.me"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
 
