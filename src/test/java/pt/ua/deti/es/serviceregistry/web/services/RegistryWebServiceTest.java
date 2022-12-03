@@ -218,7 +218,7 @@ class RegistryWebServiceTest {
     }
 
     @Test
-    void freeUniqueIdForComponent_whenDeviceOffline() {
+    void freeUniqueIdForComponentWhenDeviceOffline() {
 
         UUID componentUniqueId = UUID.randomUUID();
 
@@ -239,7 +239,7 @@ class RegistryWebServiceTest {
     }
 
     @Test
-    void freeUniqueIdForComponent_whenNoDevicesOffline() {
+    void freeUniqueIdForComponentWhenNoDevicesOffline() {
 
         UUID componentUniqueId = UUID.randomUUID();
 
@@ -257,7 +257,7 @@ class RegistryWebServiceTest {
     }
 
     @Test
-    void freeUniqueIdForComponent_whenUnableToRegister() {
+    void freeUniqueIdForComponentWhenUnableToRegister() {
 
         UUID componentUniqueId = UUID.randomUUID();
 
