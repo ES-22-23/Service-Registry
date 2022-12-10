@@ -43,8 +43,8 @@ public class ComponentsHealthScheduler {
         registryWebService.getAllRegisteredComponents().forEach(registeredComponent -> {
 
             RestTemplate restTemplate = new RestTemplateBuilder()
-                    .setConnectTimeout(Duration.ofSeconds(1))
-                    .setReadTimeout(Duration.ofSeconds(1))
+                    .setConnectTimeout(Duration.ofSeconds(2))
+                    .setReadTimeout(Duration.ofSeconds(2))
                     .build();
 
             String componentHealthEndpoint = componentUtils.buildHealthEndpoint(registeredComponent, false);
