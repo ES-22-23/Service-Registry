@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownContentTypeException;
@@ -60,10 +61,14 @@ public class ComponentsHealthScheduler {
             try {
                 componentHealthReport = restTemplate.exchange(componentHealthEndpoint, HttpMethod.GET, null, HealthReport.class);
             } catch (ResourceAccessException e) {
-                // Ignore Timeout and Failed to Convert to Health Report Exceptions. Already treated in the next if statement.
+                // Ignore Timeout. Already treated in the next if statement.
                 componentHealthReport = null;
             } catch (UnknownContentTypeException e) {
+                // Ignore Unknown Content Type Exception.
                 componentHealthReport = new ResponseEntity<>(null, HttpStatus.valueOf(e.getRawStatusCode()));
+            } catch (HttpServerErrorException e) {
+                // Ignore Server Error Exception.
+                componentHealthReport = new ResponseEntity<>(null, e.getStatusCode());
             }
 
             boolean isComponentHealthy;
